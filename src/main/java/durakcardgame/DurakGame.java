@@ -15,7 +15,6 @@ public class DurakGame {
     private final Set<Integer> attackerPassed = new HashSet<>();
 
     public static final int NUM_PLAYERS = 2;
-
     private static final int NUM_ATTACKS = 6;
 
     public DurakGame() {
@@ -56,14 +55,20 @@ public class DurakGame {
     private int findLowestTrumpHolder() {
         int result = 0;
         Card resultCard = null;
+
         for (int player = 0; player < hands.length; player++) {
             List<Card> hand = hands[player];
-            Card card = hand.stream().filter(c -> c.suite() == trumpCard.suite()).min(Comparator.comparingInt(Card::rank)).orElse(null);
+            Card card = hand.stream()
+                    .filter(c -> c.suite() == trumpCard.suite())
+                    .min(Comparator.comparingInt(Card::rank))
+                    .orElse(null);
+
             if (resultCard == null || (card != null && resultCard.rank() > card.rank())) {
                 result = player;
                 resultCard = card;
             }
         }
+
         return result;
     }
 
@@ -74,6 +79,7 @@ public class DurakGame {
                     do {
                         attacker = (attacker + 1) % hands.length;
                     } while (attacker != defender);
+
                     attackerPassed.add(attacker);
 
                     if (attackerPassed.size() == hands.length - 1) {
@@ -84,13 +90,13 @@ public class DurakGame {
                     }
                 } else {
                     Card card = hands[attacker].remove(cardIndex);
-
                     assert pile.isEmpty() || pile.stream().anyMatch(c -> c.rank() == card.rank());
                     pile.add(card);
                     state = DurakState.DEFEND;
                     attackerPassed.remove(attacker);
                 }
             }
+
             case DEFEND -> {
                 if (cardIndex == -1) {
                     hands[defender].addAll(pile);
@@ -99,6 +105,7 @@ public class DurakGame {
                 } else {
                     Card defendCard = hands[defender].remove(cardIndex);
                     Card attackCard = pile.getLast();
+
                     assert defendCard.suite() == trumpCard.suite() ||
                             defendCard.suite() == attackCard.suite() && defendCard.rank() > attackCard.rank();
 
@@ -114,18 +121,22 @@ public class DurakGame {
                         pile.clear();
                         refillHands();
                     }
+
                     state = DurakState.ATTACK;
                 }
             }
+
             case DISCARD -> {
                 if (cardIndex != -1) {
                     Card card = hands[attacker].remove(cardIndex);
                     assert pile.stream().anyMatch(c -> c.rank() == card.rank());
                     hands[defender].add(card);
                 }
+
                 do {
                     attacker = (attacker + 1) % hands.length;
                 } while (attacker == defender);
+
                 if (--attackerDiscardCountdown == 0) {
                     attacker = (defender + 1) % hands.length;
                     pile.clear();
@@ -149,19 +160,27 @@ public class DurakGame {
             case ATTACK, DISCARD -> {
                 List<Card> hand = hands[attacker];
                 Set<Integer> pileRankSet = pile.stream().map(Card::rank).collect(Collectors.toSet());
-                yield IntStream.range(-1, hand.size()).filter(i -> pile.isEmpty() || i == -1 || pileRankSet.contains(hand.get(i).rank())).toArray();
+
+                yield IntStream.range(-1, hand.size())
+                        .filter(i -> pile.isEmpty() || i == -1 || pileRankSet.contains(hand.get(i).rank()))
+                        .toArray();
             }
+
             case DEFEND -> {
                 List<Card> hand = hands[defender];
                 Card attackCard = pile.getLast();
-                yield IntStream.range(-1, hand.size()).filter(i -> {
-                    if (i == -1) {
-                        return true;
-                    }
-                    Card defendCard = hand.get(i);
-                    return defendCard.suite() == trumpCard.suite() ||
-                            defendCard.suite() == attackCard.suite() && defendCard.rank() > attackCard.rank();
-                }).toArray();
+
+                yield IntStream.range(-1, hand.size())
+                        .filter(i -> {
+                            if (i == -1) {
+                                return true;
+                            }
+
+                            Card defendCard = hand.get(i);
+                            return defendCard.suite() == trumpCard.suite() ||
+                                    defendCard.suite() == attackCard.suite() && defendCard.rank() > attackCard.rank();
+                        })
+                        .toArray();
             }
         };
     }
