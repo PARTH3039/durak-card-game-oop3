@@ -1,0 +1,29 @@
+Durak Card Game Project
+
+Group: Group 6
+
+How to Run:
+
+1. Open the project in IntelliJ IDEA
+2. Make sure Maven dependencies are loaded
+3. Run the main application (GameController or Main class)
+4. Ensure JavaFX is properly configured
+
+Technologies Used:
+
+* Java
+* JavaFX
+* SQLite
+* Maven
+
+Features:
+
+* 2-player gameplay (Human vs AI)
+* AI difficulty levels (Easy, Medium, Hard)
+* User login and registration system
+* Game statistics tracking (wins, losses, games played)
+
+Notes:
+
+* Database file (durak.db) must remain in the correct path
+* Requires JavaFX setup in IntelliJ
